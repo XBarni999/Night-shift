@@ -1,0 +1,12 @@
+# Godot 4 кеш та імпорт
+.godot/
+
+# C# / .NET збірка
+.vs/
+bin/
+obj/
+*.csproj.user
+
+# Системні файли
+Thumbs.db
+.DS_Store

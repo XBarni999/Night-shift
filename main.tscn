@@ -1,0 +1,325 @@
+[gd_scene format=3 uid="uid://chatnksc77768"]
+
+[ext_resource type="Script" uid="uid://w1nkk6ent8fu" path="res://Player.cs" id="1_ig7tw"]
+[ext_resource type="Script" uid="uid://c8b1tokbk74hw" path="res://FlickeringLight.cs" id="3_1bvp3"]
+[ext_resource type="Script" uid="uid://cmvl4bfu68bqh" path="res://PauseMenu.cs" id="3_h2yge"]
+[ext_resource type="PackedScene" uid="uid://ulvstlgpnfhk" path="res://props/shelf.tscn" id="5_7mycd"]
+[ext_resource type="PackedScene" uid="uid://j001ih3lq6rl" path="res://props/box.tscn" id="6_7mycd"]
+[ext_resource type="PackedScene" uid="uid://cd5gx58pkggx" path="res://props/switch_box.tscn" id="6_272bh"]
+[ext_resource type="Script" uid="uid://dmws71bi5t7us" path="res://PropSpawner.cs" id="7_272bh"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_ihk4x"]
+radius = 0.3
+height = 1.670166
+
+[sub_resource type="Environment" id="Environment_ihk4x"]
+background_mode = 1
+ambient_light_source = 1
+tonemap_mode = 1
+ssao_enabled = true
+glow_enabled = true
+fog_light_color = Color(0.29307458, 0.3203526, 0.362795, 1)
+fog_light_energy = 0.6
+volumetric_fog_enabled = true
+volumetric_fog_density = 0.167
+volumetric_fog_albedo = Color(0.21787646, 0.25825536, 0.27517402, 1)
+volumetric_fog_anisotropy = 0.53
+volumetric_fog_length = 40.75
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ihk4x"]
+albedo_color = Color(0.12591085, 0.12591085, 0.12591082, 1)
+roughness = 0.95
+
+[node name="Main" type="Node3D" unique_id=1682770927]
+
+[node name="Player" type="CharacterBody3D" parent="." unique_id=1900513827 node_paths=PackedStringArray("FlashlightHolder", "Head", "Flashlight", "InteractRay", "InteractPrompt")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.1897564, -2.2241583, 3)
+script = ExtResource("1_ig7tw")
+FlashlightHolder = NodePath(".")
+FlashlightBobAmount = 0.1
+FlashlightBobSpeed = 10.96
+Head = NodePath("Head")
+Flashlight = NodePath("SpotLight3D")
+InteractRay = NodePath("Head/RayCast3D")
+InteractPrompt = NodePath("UI/InteractPrompt")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Player" unique_id=1241734913]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.97905946, 0)
+shape = SubResource("CapsuleShape3D_ihk4x")
+
+[node name="SpotLight3D" type="SpotLight3D" parent="Player" unique_id=1070543660]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+light_color = Color(1, 0.9529412, 0.8392157, 1)
+light_energy = 2.584
+light_volumetric_fog_energy = 2.425
+shadow_enabled = true
+spot_range = 14.0
+spot_angle = 32.0
+spot_angle_attenuation = 1.7411015
+
+[node name="Head" type="Node3D" parent="Player" unique_id=2103827199]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+
+[node name="Camera3D" type="Camera3D" parent="Player/Head" unique_id=1095564182]
+
+[node name="RayCast3D" type="RayCast3D" parent="Player/Head" unique_id=1760013834]
+target_position = Vector3(0, 0, -2.5)
+debug_shape_custom_color = Color(0, 0.8854879, 0, 1)
+debug_shape_thickness = 1
+
+[node name="UI" type="CanvasLayer" parent="Player" unique_id=539445774]
+
+[node name="InteractPrompt" type="Label" parent="Player/UI" unique_id=1415555704]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = 76.0
+offset_right = 20.0
+offset_bottom = 99.0
+grow_horizontal = 2
+grow_vertical = 2
+horizontal_alignment = 1
+
+[node name="Crosshair" type="ColorRect" parent="Player/UI" unique_id=1410154843]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -1.5
+offset_top = -1.5
+offset_right = 2.5
+offset_bottom = 2.5
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(1, 1, 1, 0.47843137)
+
+[node name="Warehouse" type="CSGBox3D" parent="." unique_id=1261698665]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.018291473, 0, -0.00060606)
+use_collision = true
+flip_faces = true
+size = Vector3(60, 5, 60)
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1100470255]
+environment = SubResource("Environment_ihk4x")
+
+[node name="StartLight" type="OmniLight3D" parent="." unique_id=1347762118]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.425712, 2.3055654)
+light_color = Color(1, 0.7916667, 0.5, 1)
+light_energy = 0.897
+light_volumetric_fog_energy = 3.059
+light_size = 0.089
+shadow_enabled = true
+shadow_bias = 0.03
+shadow_normal_bias = 1.5
+omni_range = 10.442
+omni_attenuation = 1.198
+script = ExtResource("3_1bvp3")
+
+[node name="SkladLight" type="OmniLight3D" parent="." unique_id=1816832507]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.425712, -22.096813)
+light_color = Color(1, 0.7916667, 0.5, 1)
+light_energy = 0.897
+light_volumetric_fog_energy = 3.059
+light_size = 0.089
+shadow_enabled = true
+shadow_bias = 0.03
+shadow_normal_bias = 1.5
+omni_range = 10.442
+omni_attenuation = 1.198
+script = ExtResource("3_1bvp3")
+
+[node name="Spawner" type="Marker3D" parent="." unique_id=1465712986]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.873633, -2.0484896, 10.701399)
+script = ExtResource("7_272bh")
+PropScene = ExtResource("6_7mycd")
+
+[node name="Map" type="Node3D" parent="." unique_id=1751463863]
+
+[node name="Deco" type="Node3D" parent="Map" unique_id=1947951740]
+
+[node name="Shelf" parent="Map/Deco" unique_id=1358992494 instance=ExtResource("5_7mycd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.08303332, -0.0043108463, -11.252237)
+
+[node name="Shelf2" parent="Map/Deco" unique_id=1544432343 instance=ExtResource("5_7mycd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.08303332, -0.0043108463, -14.491734)
+
+[node name="Shelf3" parent="Map/Deco" unique_id=1696391505 instance=ExtResource("5_7mycd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.08303332, -0.0043108463, -17.806854)
+
+[node name="Shelf4" parent="Map/Deco" unique_id=1070279187 instance=ExtResource("5_7mycd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.08303332, -0.0043108463, -21.383135)
+
+[node name="Shelf5" parent="Map/Deco" unique_id=685502195 instance=ExtResource("5_7mycd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.08303332, -0.0043108463, -24.618065)
+
+[node name="Shelf6" parent="Map/Deco" unique_id=732566488 instance=ExtResource("5_7mycd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.9834795, -0.0043108463, -11.252237)
+
+[node name="Shelf7" parent="Map/Deco" unique_id=1501278404 instance=ExtResource("5_7mycd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.9834795, -0.0043108463, -14.491734)
+
+[node name="Shelf8" parent="Map/Deco" unique_id=1006951756 instance=ExtResource("5_7mycd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.9834795, -0.0043108463, -17.806854)
+
+[node name="Shelf9" parent="Map/Deco" unique_id=447584046 instance=ExtResource("5_7mycd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.9834795, -0.0043108463, -21.383135)
+
+[node name="Shelf10" parent="Map/Deco" unique_id=947936242 instance=ExtResource("5_7mycd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.9834795, -0.0043108463, -24.618065)
+
+[node name="Shelf11" parent="Map/Deco" unique_id=200928774 instance=ExtResource("5_7mycd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.887073, -0.0043108463, -11.252237)
+
+[node name="Shelf12" parent="Map/Deco" unique_id=758816207 instance=ExtResource("5_7mycd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.887073, -0.0043108463, -14.491734)
+
+[node name="Shelf13" parent="Map/Deco" unique_id=366146456 instance=ExtResource("5_7mycd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.887073, -0.0043108463, -17.806854)
+
+[node name="Shelf14" parent="Map/Deco" unique_id=1818502754 instance=ExtResource("5_7mycd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.887073, -0.0043108463, -21.383135)
+
+[node name="Shelf15" parent="Map/Deco" unique_id=593548452 instance=ExtResource("5_7mycd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.887073, -0.0043108463, -24.618065)
+
+[node name="Shelf16" parent="Map/Deco" unique_id=735514292 instance=ExtResource("5_7mycd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.265697, -0.0043108463, -11.252237)
+
+[node name="Shelf17" parent="Map/Deco" unique_id=1847090592 instance=ExtResource("5_7mycd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.265697, -0.0043108463, -14.491734)
+
+[node name="Shelf18" parent="Map/Deco" unique_id=1201016277 instance=ExtResource("5_7mycd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.265697, -0.0043108463, -17.806854)
+
+[node name="Shelf19" parent="Map/Deco" unique_id=366548348 instance=ExtResource("5_7mycd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.265697, -0.0043108463, -21.383135)
+
+[node name="Shelf20" parent="Map/Deco" unique_id=2038053322 instance=ExtResource("5_7mycd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.265697, -0.0043108463, -24.618065)
+
+[node name="Shelf21" parent="Map/Deco" unique_id=1007005059 instance=ExtResource("5_7mycd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26.657108, -0.0043108463, -11.252237)
+
+[node name="Shelf22" parent="Map/Deco" unique_id=1884399389 instance=ExtResource("5_7mycd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26.657108, -0.0043108463, -14.491734)
+
+[node name="Shelf23" parent="Map/Deco" unique_id=864403046 instance=ExtResource("5_7mycd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26.657108, -0.0043108463, -17.806854)
+
+[node name="Shelf24" parent="Map/Deco" unique_id=618257725 instance=ExtResource("5_7mycd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26.657108, -0.0043108463, -21.383135)
+
+[node name="Shelf25" parent="Map/Deco" unique_id=421575577 instance=ExtResource("5_7mycd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26.657108, -0.0043108463, -24.618065)
+
+[node name="wall" type="CSGBox3D" parent="Map" unique_id=937005714]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 6)
+use_collision = true
+size = Vector3(5, 5, 0.3)
+material = SubResource("StandardMaterial3D_ihk4x")
+
+[node name="wall6" type="CSGBox3D" parent="Map" unique_id=715494608]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28.352444, 0, 0.14606833)
+use_collision = true
+size = Vector3(10.910278, 5, 0.3)
+material = SubResource("StandardMaterial3D_ihk4x")
+
+[node name="wall4" type="CSGBox3D" parent="Map" unique_id=433828903]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.177527, 0, 6)
+use_collision = true
+size = Vector3(15.606445, 5, 0.3)
+material = SubResource("StandardMaterial3D_ihk4x")
+
+[node name="wall2" type="CSGBox3D" parent="Map" unique_id=1944668308]
+transform = Transform3D(0.020674497, 0, -0.99978626, 0, 1, 0, 0.99978626, 0, 0.020674497, -2.6863313, 0, 3.050026)
+use_collision = true
+size = Vector3(6.1870117, 5, 0.3)
+material = SubResource("StandardMaterial3D_ihk4x")
+
+[node name="wall3" type="CSGBox3D" parent="Map" unique_id=1718039330]
+transform = Transform3D(0.020674497, 0, -0.99978626, 0, 1, 0, 0.99978626, 0, 0.020674497, 2.426128, 0, 3.050026)
+use_collision = true
+size = Vector3(6.1870117, 5, 0.3)
+material = SubResource("StandardMaterial3D_ihk4x")
+
+[node name="wall5" type="CSGBox3D" parent="Map" unique_id=1735077251]
+transform = Transform3D(0.020674497, 0, -0.99978626, 0, 1, 0, 0.99978626, 0, 0.020674497, 17.76658, 0, 3.050026)
+use_collision = true
+size = Vector3(6.1870117, 5, 0.3)
+material = SubResource("StandardMaterial3D_ihk4x")
+
+[node name="WallWithDoor" type="CSGCombiner3D" parent="Map" unique_id=563124082]
+use_collision = true
+
+[node name="wall2" type="CSGBox3D" parent="Map/WallWithDoor" unique_id=896586633]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.16674805, 0, 0)
+use_collision = true
+size = Vector3(5.333496, 5, 0.3)
+material = SubResource("StandardMaterial3D_ihk4x")
+
+[node name="DoorCutout" type="CSGBox3D" parent="Map/WallWithDoor" unique_id=1939894474]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.3261545, 0)
+operation = 2
+size = Vector3(1.4, 2.4, 0.6)
+
+[node name="WallWithDoor2" type="CSGCombiner3D" parent="Map" unique_id=1769964383]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20.459053, 0, 0.10559893)
+use_collision = true
+
+[node name="wall2" type="CSGBox3D" parent="Map/WallWithDoor2" unique_id=349043060]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.16674805, 0, 0)
+use_collision = true
+size = Vector3(5.333496, 5, 0.3)
+material = SubResource("StandardMaterial3D_ihk4x")
+
+[node name="DoorCutout" type="CSGBox3D" parent="Map/WallWithDoor2" unique_id=893886641]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.3261545, 0)
+operation = 2
+size = Vector3(1.4, 2.4, 0.6)
+
+[node name="Menu" type="CanvasLayer" parent="." unique_id=593859784]
+process_mode = 3
+
+[node name="PauseMenu" type="Control" parent="Menu" unique_id=1469174230 node_paths=PackedStringArray("WorldEnv", "FogToggle")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("3_h2yge")
+WorldEnv = NodePath("../../WorldEnvironment")
+FogToggle = NodePath("CenterContainer/VBoxContainer/FogToggle")
+
+[node name="CenterContainer" type="CenterContainer" parent="Menu/PauseMenu" unique_id=669502760]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Menu/PauseMenu/CenterContainer" unique_id=1431035230]
+layout_mode = 2
+
+[node name="ResumeButton" type="Button" parent="Menu/PauseMenu/CenterContainer/VBoxContainer" unique_id=527198419]
+layout_mode = 2
+text = "Resume"
+
+[node name="QuitButton" type="Button" parent="Menu/PauseMenu/CenterContainer/VBoxContainer" unique_id=1958205116]
+layout_mode = 2
+text = "Quit"
+
+[node name="FogToggle" type="CheckButton" parent="Menu/PauseMenu/CenterContainer/VBoxContainer" unique_id=1047122615]
+layout_mode = 2
+text = "Об'ємний туман (Volumetric)"
+
+[node name="SwitchBox" parent="." unique_id=1439085780 node_paths=PackedStringArray("TargetLights") instance=ExtResource("6_272bh")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.4147516, -0.56501013, -0.4207518)
+TargetLights = [NodePath("../SkladLight")]
+IsOn = false

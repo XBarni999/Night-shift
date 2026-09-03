@@ -1,0 +1,17 @@
+[gd_scene format=3 uid="uid://j001ih3lq6rl"]
+
+[ext_resource type="Script" uid="uid://dw4x5f48s5gi8" path="res://PhysicsProp.cs" id="1_g2tbl"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_0aqka"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_ihk4x"]
+
+[node name="Box" type="RigidBody3D" unique_id=1325428982]
+mass = 2.52
+script = ExtResource("1_g2tbl")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=2016038301]
+shape = SubResource("BoxShape3D_0aqka")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1436140618]
+mesh = SubResource("BoxMesh_ihk4x")

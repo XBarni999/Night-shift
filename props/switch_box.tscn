@@ -1,0 +1,29 @@
+[gd_scene format=3 uid="uid://cd5gx58pkggx"]
+
+[ext_resource type="Script" uid="uid://ct2vj2x5wkuc6" path="res://LightSwitch.cs" id="1_epiyh"]
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_0aqka"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ihk4x"]
+size = Vector3(0.7467041, 0.7108154, 0.58447266)
+
+[sub_resource type="BoxMesh" id="BoxMesh_0aqka"]
+size = Vector3(0.2664795, 0.32788086, 0.088378906)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bo6bm"]
+albedo_color = Color(1, 0.25, 0.25, 1)
+emission = Color(0.63, 0.075600006, 0.075600006, 1)
+emission_energy_multiplier = 2.13
+
+[node name="SwitchBox" type="StaticBody3D" unique_id=1439085780]
+physics_material_override = SubResource("PhysicsMaterial_0aqka")
+script = ExtResource("1_epiyh")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1480607039]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.18682861, -0.2156372, 0.20776367)
+shape = SubResource("BoxShape3D_ihk4x")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1228524549]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.10882568, -0.33605957, -0.0026855469)
+mesh = SubResource("BoxMesh_0aqka")
+surface_material_override/0 = SubResource("StandardMaterial3D_bo6bm")
