@@ -1,34 +1,7 @@
-# Godot: проєкт, кеш та сцени
-.godot/
-project.godot
-*.tscn
-*.tres
+# Ігноруємо абсолютно все
+/*
 
-# Текстури та графіка
-*.png
-*.jpg
-*.jpeg
-*.tga
-*.webp
-*.psd
-*.exr
-*.hdr
-
-# 3D моделі та ассети
-*.glb
-*.gltf
-*.obj
-*.fbx
-*.blend
-
-# Аудіо
-*.wav
-*.mp3
-*.ogg
-
-# .NET / C# службові файли
-.vs/
-.idea/
-bin/
-obj/
-*.csproj.user
+# Дозволяємо виключно .gitignore та папку Build з її вмістом
+!.gitignore
+!/Build/
+!/Build/**
