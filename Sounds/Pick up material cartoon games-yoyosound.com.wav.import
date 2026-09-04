@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://cwsntj6eomxwu"
+path="res://.godot/imported/Pick up material cartoon games-yoyosound.com.wav-4ff1b15c791b01a956bcb7cb1760367d.sample"
+
+[deps]
+
+source_file="res://Sounds/Pick up material cartoon games-yoyosound.com.wav"
+dest_files=["res://.godot/imported/Pick up material cartoon games-yoyosound.com.wav-4ff1b15c791b01a956bcb7cb1760367d.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

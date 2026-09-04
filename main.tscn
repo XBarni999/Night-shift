@@ -1,16 +1,37 @@
 [gd_scene format=3 uid="uid://chatnksc77768"]
 
-[ext_resource type="Script" uid="uid://w1nkk6ent8fu" path="res://Player.cs" id="1_ig7tw"]
-[ext_resource type="Script" uid="uid://c8b1tokbk74hw" path="res://FlickeringLight.cs" id="3_1bvp3"]
-[ext_resource type="Script" uid="uid://cmvl4bfu68bqh" path="res://PauseMenu.cs" id="3_h2yge"]
+[ext_resource type="Script" uid="uid://w1nkk6ent8fu" path="res://Scripts/Player.cs" id="1_ig7tw"]
+[ext_resource type="AudioStream" uid="uid://duplvv288uf5u" path="res://Sounds/step.wav" id="2_dg77c"]
+[ext_resource type="AudioStream" uid="uid://c7wckyr2yobk5" path="res://Sounds/flashlight on.mp3" id="2_efxa6"]
+[ext_resource type="Script" uid="uid://c8b1tokbk74hw" path="res://Scripts/FlickeringLight.cs" id="3_1bvp3"]
+[ext_resource type="Script" uid="uid://cmvl4bfu68bqh" path="res://Scripts/PauseMenu.cs" id="3_h2yge"]
+[ext_resource type="AudioStream" uid="uid://csmpp0qux7ayp" path="res://Sounds/jumping-on-grass-gidagzhe.wav" id="4_ycdy4"]
 [ext_resource type="PackedScene" uid="uid://ulvstlgpnfhk" path="res://props/shelf.tscn" id="5_7mycd"]
 [ext_resource type="PackedScene" uid="uid://j001ih3lq6rl" path="res://props/box.tscn" id="6_7mycd"]
 [ext_resource type="PackedScene" uid="uid://cd5gx58pkggx" path="res://props/switch_box.tscn" id="6_272bh"]
-[ext_resource type="Script" uid="uid://dmws71bi5t7us" path="res://PropSpawner.cs" id="7_272bh"]
+[ext_resource type="PackedScene" uid="uid://dka625rrwbqnw" path="res://props/Lamp.tscn" id="6_ycdy4"]
+[ext_resource type="Script" uid="uid://dmws71bi5t7us" path="res://Scripts/PropSpawner.cs" id="7_272bh"]
+[ext_resource type="Script" uid="uid://dqlsg63pvld8m" path="res://Scripts/InteractiveDoor.cs" id="8_5vw27"]
+[ext_resource type="AudioStream" uid="uid://dkfpvhwi8ccv6" path="res://Sounds/mixkit-wooden-floorboard-creak-337.wav" id="9_kek77"]
+[ext_resource type="PackedScene" uid="uid://c581egovmlxoj" path="res://props/battery.tscn" id="14_w48qg"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_ihk4x"]
 radius = 0.3
 height = 1.670166
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_w48qg"]
+bg_color = Color(0.078431375, 0.078431375, 0.078431375, 0.6666667)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_vivmo"]
+bg_color = Color(0.5647059, 0.8784314, 0.9372549, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
 [sub_resource type="Environment" id="Environment_ihk4x"]
 background_mode = 1
@@ -30,18 +51,29 @@ volumetric_fog_length = 40.75
 albedo_color = Color(0.12591085, 0.12591085, 0.12591082, 1)
 roughness = 0.95
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_ihk4x"]
+size = Vector3(1.4095459, 1.3657684, 0.4881668)
+
+[sub_resource type="BoxMesh" id="BoxMesh_5vw27"]
+size = Vector3(1.3817139, 2.2644577, 0.05)
+
 [node name="Main" type="Node3D" unique_id=1682770927]
 
-[node name="Player" type="CharacterBody3D" parent="." unique_id=1900513827 node_paths=PackedStringArray("FlashlightHolder", "Head", "Flashlight", "InteractRay", "InteractPrompt")]
+[node name="Player" type="CharacterBody3D" parent="." unique_id=1900513827 node_paths=PackedStringArray("PlayerCollider", "Flashlight", "InteractPrompt", "FlashlightAudio", "FootstepAudio", "JumpAudio", "Head", "Camera", "InteractRay")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.1897564, -2.2241583, 3)
 script = ExtResource("1_ig7tw")
-FlashlightHolder = NodePath(".")
-FlashlightBobAmount = 0.1
-FlashlightBobSpeed = 10.96
-Head = NodePath("Head")
+Gravity = 8.8
+PlayerCollider = NodePath("CollisionShape3D")
+StandingHeight = 1.7
+StandingHeadY = 1.7
 Flashlight = NodePath("SpotLight3D")
-InteractRay = NodePath("Head/RayCast3D")
 InteractPrompt = NodePath("UI/InteractPrompt")
+FlashlightAudio = NodePath("FlashlightAudio")
+FootstepAudio = NodePath("FootstepAudio")
+JumpAudio = NodePath("JumpAudio")
+Head = NodePath("Head")
+Camera = NodePath("Head/Camera3D")
+InteractRay = NodePath("Head/RayCast3D")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Player" unique_id=1241734913]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.97905946, 0)
@@ -98,6 +130,95 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(1, 1, 1, 0.47843137)
 
+[node name="FpsLabel" type="Label" parent="Player/UI" unique_id=1143684288]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -55.0
+offset_bottom = 23.0
+grow_horizontal = 0
+theme_override_colors/font_color = Color(0.56110847, 0.70061874, 0.21300992, 1)
+text = "FPS: 60"
+
+[node name="HUDContainer" type="Control" parent="Player/UI" unique_id=1796475255]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Player/UI/HUDContainer" unique_id=1780579467]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 40.0
+offset_top = -80.0
+offset_right = 80.0
+offset_bottom = -30.0
+grow_vertical = 0
+theme_override_constants/separation = 8
+
+[node name="StaminaBar" type="ProgressBar" parent="Player/UI/HUDContainer/VBoxContainer" unique_id=1136898773]
+custom_minimum_size = Vector2(180, 6)
+layout_mode = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_w48qg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_vivmo")
+show_percentage = false
+
+[node name="BatteryContainer" type="HBoxContainer" parent="Player/UI/HUDContainer/VBoxContainer" unique_id=1256515830]
+layout_mode = 2
+
+[node name="BatteryIcon" type="Label" parent="Player/UI/HUDContainer/VBoxContainer/BatteryContainer" unique_id=493693137]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.627451)
+theme_override_font_sizes/font_size = 13
+text = "BAT"
+
+[node name="BatteryCountLabel" type="Label" parent="Player/UI/HUDContainer/VBoxContainer/BatteryContainer" unique_id=770187528]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.60784316)
+theme_override_font_sizes/font_size = 12
+text = "x0"
+
+[node name="BatterySegments" type="HBoxContainer" parent="Player/UI/HUDContainer/VBoxContainer/BatteryContainer" unique_id=1010130499]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Seg1" type="ColorRect" parent="Player/UI/HUDContainer/VBoxContainer/BatteryContainer/BatterySegments" unique_id=1665490944]
+custom_minimum_size = Vector2(10, 14)
+layout_mode = 2
+color = Color(0.8366, 0.94, 0.9107033, 1)
+
+[node name="Seg2" type="ColorRect" parent="Player/UI/HUDContainer/VBoxContainer/BatteryContainer/BatterySegments" unique_id=1270067950]
+custom_minimum_size = Vector2(10, 14)
+layout_mode = 2
+color = Color(0.8366, 0.94, 0.9107033, 1)
+
+[node name="Seg3" type="ColorRect" parent="Player/UI/HUDContainer/VBoxContainer/BatteryContainer/BatterySegments" unique_id=817886348]
+custom_minimum_size = Vector2(10, 14)
+layout_mode = 2
+color = Color(0.8366, 0.94, 0.9107033, 1)
+
+[node name="Seg4" type="ColorRect" parent="Player/UI/HUDContainer/VBoxContainer/BatteryContainer/BatterySegments" unique_id=324889396]
+custom_minimum_size = Vector2(10, 14)
+layout_mode = 2
+color = Color(0.8366, 0.94, 0.9107033, 1)
+
+[node name="FlashlightAudio" type="AudioStreamPlayer" parent="Player" unique_id=1292711653]
+stream = ExtResource("2_efxa6")
+volume_db = -12.397
+
+[node name="FootstepAudio" type="AudioStreamPlayer" parent="Player" unique_id=1704167181]
+stream = ExtResource("2_dg77c")
+volume_db = -34.596
+
+[node name="JumpAudio" type="AudioStreamPlayer" parent="Player" unique_id=2084556411]
+stream = ExtResource("4_ycdy4")
+volume_db = -3.603
+
 [node name="Warehouse" type="CSGBox3D" parent="." unique_id=1261698665]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.018291473, 0, -0.00060606)
 use_collision = true
@@ -120,18 +241,8 @@ omni_range = 10.442
 omni_attenuation = 1.198
 script = ExtResource("3_1bvp3")
 
-[node name="SkladLight" type="OmniLight3D" parent="." unique_id=1816832507]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.425712, -22.096813)
-light_color = Color(1, 0.7916667, 0.5, 1)
-light_energy = 0.897
-light_volumetric_fog_energy = 3.059
-light_size = 0.089
-shadow_enabled = true
-shadow_bias = 0.03
-shadow_normal_bias = 1.5
-omni_range = 10.442
-omni_attenuation = 1.198
-script = ExtResource("3_1bvp3")
+[node name="SkladLight" parent="." unique_id=1316886067 instance=ExtResource("6_ycdy4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5005064, -22.096813)
 
 [node name="Spawner" type="Marker3D" parent="." unique_id=1465712986]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.873633, -2.0484896, 10.701399)
@@ -282,10 +393,51 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.3261545, 0)
 operation = 2
 size = Vector3(1.4, 2.4, 0.6)
 
+[node name="Door" type="Node3D" parent="Map" unique_id=1037869010]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.6831596, -1.5439849, 0)
+
+[node name="DoorHinge" type="AnimatableBody3D" parent="Map/Door" unique_id=961534319 node_paths=PackedStringArray("CreakAudio")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.043385267, 0, 0)
+script = ExtResource("8_5vw27")
+InvertDirection = true
+CreakAudio = NodePath("DoorAudio")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Map/Door/DoorHinge" unique_id=1968241723]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.7, 0.23500001, -0.005348267)
+shape = SubResource("BoxShape3D_ihk4x")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Map/Door/DoorHinge" unique_id=441451315]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.7248413, 0.26418352, 0)
+mesh = SubResource("BoxMesh_5vw27")
+
+[node name="DoorAudio" type="AudioStreamPlayer3D" parent="Map/Door/DoorHinge" unique_id=1905820936]
+stream = ExtResource("9_kek77")
+volume_db = -20.0
+
+[node name="Door2" type="Node3D" parent="Map" unique_id=1624539579]
+transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 21.141443, -1.5439849, 0)
+
+[node name="DoorHinge" type="AnimatableBody3D" parent="Map/Door2" unique_id=1627016111]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.043385267, 0, 0)
+script = ExtResource("8_5vw27")
+InvertDirection = true
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Map/Door2/DoorHinge" unique_id=632510989]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.764637, 0.33097017, -0.021869723)
+shape = SubResource("BoxShape3D_ihk4x")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Map/Door2/DoorHinge" unique_id=934378834]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.7248413, 0.26418352, 0)
+mesh = SubResource("BoxMesh_5vw27")
+
+[node name="DoorAudio" type="AudioStreamPlayer3D" parent="Map/Door2/DoorHinge" unique_id=1161618902]
+stream = ExtResource("9_kek77")
+volume_db = -20.0
+
 [node name="Menu" type="CanvasLayer" parent="." unique_id=593859784]
 process_mode = 3
 
-[node name="PauseMenu" type="Control" parent="Menu" unique_id=1469174230 node_paths=PackedStringArray("WorldEnv", "FogToggle")]
+[node name="PauseMenu" type="Control" parent="Menu" unique_id=1469174230 node_paths=PackedStringArray("WorldEnv", "FogToggle", "PotatoToggle")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -294,9 +446,19 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("3_h2yge")
 WorldEnv = NodePath("../../WorldEnvironment")
-FogToggle = NodePath("CenterContainer/VBoxContainer/FogToggle")
+FogToggle = NodePath("CenterContainer/MainPanel/MarginContainer/MainLayout/SettingsPanel/FogToggle")
+PotatoToggle = NodePath("CenterContainer/MainPanel/MarginContainer/MainLayout/SettingsPanel/PotatoToggle")
 
-[node name="CenterContainer" type="CenterContainer" parent="Menu/PauseMenu" unique_id=669502760]
+[node name="DarkOverlay" type="ColorRect" parent="Menu/PauseMenu" unique_id=1433897230]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.25, 0.25, 0.25, 0.6509804)
+
+[node name="CenterContainer" type="CenterContainer" parent="Menu/PauseMenu" unique_id=1824946815]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -304,22 +466,91 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Menu/PauseMenu/CenterContainer" unique_id=1431035230]
+[node name="MainPanel" type="PanelContainer" parent="Menu/PauseMenu/CenterContainer" unique_id=310237434]
+custom_minimum_size = Vector2(100, 50)
 layout_mode = 2
 
-[node name="ResumeButton" type="Button" parent="Menu/PauseMenu/CenterContainer/VBoxContainer" unique_id=527198419]
+[node name="MarginContainer" type="MarginContainer" parent="Menu/PauseMenu/CenterContainer/MainPanel" unique_id=1069308797]
+layout_mode = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 15
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 15
+
+[node name="MainLayout" type="HBoxContainer" parent="Menu/PauseMenu/CenterContainer/MainPanel/MarginContainer" unique_id=1569450553]
+custom_minimum_size = Vector2(100, 1)
+layout_mode = 2
+
+[node name="LeftSidebar" type="PanelContainer" parent="Menu/PauseMenu/CenterContainer/MainPanel/MarginContainer/MainLayout" unique_id=583645923]
+custom_minimum_size = Vector2(0, 320)
+layout_mode = 2
+
+[node name="NavButtons" type="VBoxContainer" parent="Menu/PauseMenu/CenterContainer/MainPanel/MarginContainer/MainLayout/LeftSidebar" unique_id=1719757361]
+layout_mode = 2
+
+[node name="GameTitle" type="Label" parent="Menu/PauseMenu/CenterContainer/MainPanel/MarginContainer/MainLayout/LeftSidebar/NavButtons" unique_id=1323822851]
+layout_mode = 2
+text = "NIGHT SHIFT"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="Menu/PauseMenu/CenterContainer/MainPanel/MarginContainer/MainLayout/LeftSidebar/NavButtons" unique_id=1990983488]
+layout_mode = 2
+
+[node name="ResumeButton" type="Button" parent="Menu/PauseMenu/CenterContainer/MainPanel/MarginContainer/MainLayout/LeftSidebar/NavButtons" unique_id=527198419]
 layout_mode = 2
 text = "Resume"
 
-[node name="QuitButton" type="Button" parent="Menu/PauseMenu/CenterContainer/VBoxContainer" unique_id=1958205116]
+[node name="SettingsButton" type="Button" parent="Menu/PauseMenu/CenterContainer/MainPanel/MarginContainer/MainLayout/LeftSidebar/NavButtons" unique_id=656263300]
+layout_mode = 2
+text = "Settings"
+
+[node name="QuitButton" type="Button" parent="Menu/PauseMenu/CenterContainer/MainPanel/MarginContainer/MainLayout/LeftSidebar/NavButtons" unique_id=1958205116]
 layout_mode = 2
 text = "Quit"
 
-[node name="FogToggle" type="CheckButton" parent="Menu/PauseMenu/CenterContainer/VBoxContainer" unique_id=1047122615]
+[node name="SettingsDivider" type="VSeparator" parent="Menu/PauseMenu/CenterContainer/MainPanel/MarginContainer/MainLayout" unique_id=1034493799]
+visible = false
+layout_mode = 2
+
+[node name="SettingsPanel" type="VBoxContainer" parent="Menu/PauseMenu/CenterContainer/MainPanel/MarginContainer/MainLayout" unique_id=1722015523]
+visible = false
+custom_minimum_size = Vector2(500, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Graphics" type="Label" parent="Menu/PauseMenu/CenterContainer/MainPanel/MarginContainer/MainLayout/SettingsPanel" unique_id=1102535496]
+layout_mode = 2
+text = "Graphics"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="Menu/PauseMenu/CenterContainer/MainPanel/MarginContainer/MainLayout/SettingsPanel" unique_id=1642953088]
+layout_mode = 2
+
+[node name="FogToggle" type="CheckButton" parent="Menu/PauseMenu/CenterContainer/MainPanel/MarginContainer/MainLayout/SettingsPanel" unique_id=1047122615]
 layout_mode = 2
 text = "Об'ємний туман (Volumetric)"
 
-[node name="SwitchBox" parent="." unique_id=1439085780 node_paths=PackedStringArray("TargetLights") instance=ExtResource("6_272bh")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.4147516, -0.56501013, -0.4207518)
-TargetLights = [NodePath("../SkladLight")]
-IsOn = false
+[node name="PotatoToggle" type="CheckButton" parent="Menu/PauseMenu/CenterContainer/MainPanel/MarginContainer/MainLayout/SettingsPanel" unique_id=1088658747]
+layout_mode = 2
+text = "Режим для слабких ПК"
+
+[node name="FpsToggle" type="CheckButton" parent="Menu/PauseMenu/CenterContainer/MainPanel/MarginContainer/MainLayout/SettingsPanel" unique_id=1133359807]
+layout_mode = 2
+text = "Показувати FPS"
+
+[node name="ResolutionLabel" type="Label" parent="Menu/PauseMenu/CenterContainer/MainPanel/MarginContainer/MainLayout/SettingsPanel" unique_id=1049447488]
+layout_mode = 2
+text = "Scale Render"
+
+[node name="ResolutionOption" type="OptionButton" parent="Menu/PauseMenu/CenterContainer/MainPanel/MarginContainer/MainLayout/SettingsPanel" unique_id=111277921]
+layout_mode = 2
+
+[node name="ApplySettingsButton" type="Button" parent="Menu/PauseMenu/CenterContainer/MainPanel/MarginContainer/MainLayout/SettingsPanel" unique_id=1191160747]
+layout_mode = 2
+text = "Застосувати"
+
+[node name="SwitchBox" parent="." unique_id=1439085780 instance=ExtResource("6_272bh")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2480772, -0.52579874, -0.13909654)
+
+[node name="Battery" parent="." unique_id=709456397 instance=ExtResource("14_w48qg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.6071817, -10.371014)
