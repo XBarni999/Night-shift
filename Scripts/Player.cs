@@ -1,4 +1,5 @@
 using Godot;
+using System.Collections.Generic;
 
 public partial class Player : CharacterBody3D
 {
@@ -40,6 +41,7 @@ public partial class Player : CharacterBody3D
     [Export] public HBoxContainer BatterySegments;
     [Export] public Label BatteryCountLabel;
     [Export] public Label InteractPrompt;
+    [Export] public DeathScreen PlayerDeathScreen;
 
     [ExportGroup("Audio")]
     [Export] public AudioStreamPlayer FlashlightAudio;
@@ -60,9 +62,11 @@ public partial class Player : CharacterBody3D
     public float CurrentStamina { get; private set; }
     private float _staminaRegenTimer = 0f;
     private bool _isExhausted = false;
+    private readonly HashSet<string> _keys = new HashSet<string>();
 
     public float CurrentBattery { get; private set; }
     public int InventoryBatteries { get; private set; } = 0;
+    private bool _isReloading = false;
 
     private float _stepCycle = 0f;
     private bool _stepTriggered = false;
@@ -81,7 +85,6 @@ public partial class Player : CharacterBody3D
     {
         AddToGroup("Player");
         Input.MouseMode = Input.MouseModeEnum.Captured;
-        BatterySegments ??= GetNodeOrNull<HBoxContainer>("UI/HUDContainer/VBoxContainer/BatteryContainer/BatterySegments");
 
         Head ??= GetNodeOrNull<Node3D>("Head");
         Camera ??= GetNodeOrNull<Camera3D>("Head/Camera3D");
@@ -92,6 +95,7 @@ public partial class Player : CharacterBody3D
 
         HUDGroup ??= GetNodeOrNull<CanvasItem>("UI/HUDContainer");
         StaminaBar ??= GetNodeOrNull<ProgressBar>("UI/HUDContainer/VBoxContainer/StaminaBar");
+        BatterySegments ??= GetNodeOrNull<HBoxContainer>("UI/HUDContainer/VBoxContainer/BatteryContainer/BatterySegments");
         BatteryCountLabel ??= GetNodeOrNull<Label>("UI/HUDContainer/VBoxContainer/BatteryContainer/BatteryCountLabe")
                            ?? GetNodeOrNull<Label>("UI/HUDContainer/VBoxContainer/BatteryContainer/BatteryCountLabel");
 
@@ -113,7 +117,6 @@ public partial class Player : CharacterBody3D
             StaminaBar.Modulate = c;
         }
 
-        
         if (Camera != null)
         {
             _baseCamPos = Camera.Position;
@@ -128,6 +131,38 @@ public partial class Player : CharacterBody3D
         {
             Flashlight.LightEnergy = BaseFlashlightEnergy;
         }
+    }
+
+    public void AddKey(string keyId)
+    {
+        if (!_keys.Contains(keyId))
+        {
+            _keys.Add(keyId);
+        }
+    }
+
+    public bool HasKey(string keyId)
+    {
+        return _keys.Contains(keyId);
+    }
+
+    private InteractiveDoor FindDoor(GodotObject obj)
+    {
+        if (obj is InteractiveDoor door) return door;
+
+        if (obj is Node node)
+        {
+            Node current = node.GetParent();
+            while (current != null)
+            {
+                if (current is InteractiveDoor parentDoor) return parentDoor;
+                current = current.GetParent();
+            }
+
+            if (node.Owner is InteractiveDoor ownerDoor) return ownerDoor;
+        }
+
+        return null;
     }
 
     public override void _Input(InputEvent @event)
@@ -151,9 +186,39 @@ public partial class Player : CharacterBody3D
             }
         }
 
+        if (@event is InputEventMouseButton mouseBtn && mouseBtn.ButtonIndex == MouseButton.Left)
+        {
+            if (mouseBtn.Pressed)
+            {
+                if (_heldObject != null)
+                {
+                    ThrowObject();
+                }
+                else if (InteractRay != null && InteractRay.IsColliding())
+                {
+                    var collider = InteractRay.GetCollider();
+                    var door = FindDoor(collider);
+
+                    if (door != null)
+                    {
+                        _grabbedDoor = door;
+                        _grabbedDoor.Grab(GlobalPosition);
+                    }
+                }
+            }
+            else
+            {
+                if (_grabbedDoor != null)
+                {
+                    _grabbedDoor.Release();
+                    _grabbedDoor = null;
+                }
+            }
+        }
+
         if (@event.IsActionPressed("flashlight") && Flashlight != null)
         {
-            if (CurrentBattery > 0f)
+            if (CurrentBattery > 0f && !_isReloading)
             {
                 Flashlight.Visible = !Flashlight.Visible;
                 PlayFlashlightClick();
@@ -174,34 +239,6 @@ public partial class Player : CharacterBody3D
             else
             {
                 TryInteract();
-            }
-        }
-
-        if (@event is InputEventMouseButton mouseBtn && mouseBtn.ButtonIndex == MouseButton.Left)
-        {
-            if (mouseBtn.Pressed)
-            {
-                if (_heldObject != null)
-                {
-                    ThrowObject();
-                }
-                else if (InteractRay != null && InteractRay.IsColliding())
-                {
-                    var collider = InteractRay.GetCollider();
-                    if (collider is InteractiveDoor door)
-                    {
-                        _grabbedDoor = door;
-                        _grabbedDoor.Grab(GlobalPosition);
-                    }
-                }
-            }
-            else
-            {
-                if (_grabbedDoor != null)
-                {
-                    _grabbedDoor.Release();
-                    _grabbedDoor = null;
-                }
             }
         }
     }
@@ -367,83 +404,100 @@ public partial class Player : CharacterBody3D
 
     public void ReloadBattery()
     {
-        if (InventoryBatteries > 0 && CurrentBattery < MaxBattery)
+        if (_isReloading || InventoryBatteries <= 0 || CurrentBattery >= MaxBattery) return;
+
+        _isReloading = true;
+        InventoryBatteries--;
+
+        if (Flashlight != null)
         {
-            InventoryBatteries--;
-            CurrentBattery = MaxBattery;
+            Flashlight.Visible = false;
+        }
 
-            if (BatteryReloadAudio != null)
+        if (BatteryReloadAudio != null && BatteryReloadAudio.Stream != null)
+        {
+            BatteryReloadAudio.PitchScale = (float)GD.RandRange(0.95f, 1.05f);
+            BatteryReloadAudio.Play();
+
+            void OnReloadFinished()
             {
-                BatteryReloadAudio.PitchScale = (float)GD.RandRange(0.95f, 1.05f);
-                BatteryReloadAudio.Play();
+                BatteryReloadAudio.Finished -= OnReloadFinished;
+                FinishReload();
             }
 
-            if (Flashlight != null && !Flashlight.Visible)
-            {
-                Flashlight.Visible = true;
-                PlayFlashlightClick();
-            }
+            BatteryReloadAudio.Finished += OnReloadFinished;
+        }
+        else
+        {
+            GetTree().CreateTimer(1.0).Timeout += FinishReload;
+        }
+    }
+
+    private void FinishReload()
+    {
+        CurrentBattery = MaxBattery;
+        _isReloading = false;
+
+        if (Flashlight != null)
+        {
+            Flashlight.Visible = true;
+            PlayFlashlightClick();
         }
     }
 
     private void UpdateHUD(float delta)
-{
-    // Оновлення стаміни
-    if (StaminaBar != null)
     {
-        StaminaBar.Value = CurrentStamina;
-        float targetAlpha = CurrentStamina < MaxStamina - 1.5f ? 1.0f : 0.0f;
-        Color c = StaminaBar.Modulate;
-        c.A = Mathf.Lerp(c.A, targetAlpha, delta * 5.0f);
-        StaminaBar.Modulate = c;
-    }
-
-    // Оновлення ретро-сегментів батарейки
-    if (BatterySegments != null)
-    {
-        var segments = BatterySegments.GetChildren();
-        int totalSegments = segments.Count;
-
-        if (totalSegments > 0)
+        if (StaminaBar != null)
         {
-            // Скільки сегментів має світитися прямо зараз
-            float percent = CurrentBattery / MaxBattery;
-            int activeCount = Mathf.CeilToInt(percent * totalSegments);
+            StaminaBar.Value = CurrentStamina;
+            float targetAlpha = CurrentStamina < MaxStamina - 1.5f ? 1.0f : 0.0f;
+            Color c = StaminaBar.Modulate;
+            c.A = Mathf.Lerp(c.A, targetAlpha, delta * 5.0f);
+            StaminaBar.Modulate = c;
+        }
 
-            _lowBatteryBlinkTimer += delta * 5.0f;
-            bool blinkOn = Mathf.Sin(_lowBatteryBlinkTimer) > 0;
+        if (BatterySegments != null)
+        {
+            var segments = BatterySegments.GetChildren();
+            int totalSegments = segments.Count;
 
-            for (int i = 0; i < totalSegments; i++)
+            if (totalSegments > 0)
             {
-                if (segments[i] is Control seg)
-                {
-                    bool isSegmentLit = i < activeCount;
+                float percent = CurrentBattery / MaxBattery;
+                int activeCount = Mathf.CeilToInt(percent * totalSegments);
 
-                    // Якщо лишився всього 1 кубик і ліхтарик горить, він тривожно блимає
-                    if (activeCount == 1 && i == 0 && Flashlight != null && Flashlight.Visible)
+                _lowBatteryBlinkTimer += delta * 5.0f;
+                bool blinkOn = Mathf.Sin(_lowBatteryBlinkTimer) > 0;
+
+                for (int i = 0; i < totalSegments; i++)
+                {
+                    if (segments[i] is Control seg)
                     {
-                        seg.Visible = blinkOn;
-                    }
-                    else
-                    {
-                        seg.Visible = isSegmentLit;
+                        bool isSegmentLit = i < activeCount;
+
+                        if (activeCount == 1 && i == 0 && Flashlight != null && Flashlight.Visible)
+                        {
+                            seg.Visible = blinkOn;
+                        }
+                        else
+                        {
+                            seg.Visible = isSegmentLit;
+                        }
                     }
                 }
-            }
 
-            // Плавне притухання всього блоку, якщо ліхтарик вимкнено
-            float targetAlpha = (Flashlight != null && Flashlight.Visible) ? 1.0f : 0.35f;
-            Color bc = BatterySegments.Modulate;
-            bc.A = Mathf.Lerp(bc.A, targetAlpha, delta * 4.0f);
-            BatterySegments.Modulate = bc;
+                float targetAlpha = (Flashlight != null && Flashlight.Visible) ? 1.0f : 0.35f;
+                Color bc = BatterySegments.Modulate;
+                bc.A = Mathf.Lerp(bc.A, targetAlpha, delta * 4.0f);
+                BatterySegments.Modulate = bc;
+            }
+        }
+
+        if (BatteryCountLabel != null)
+        {
+            BatteryCountLabel.Text = $"x{InventoryBatteries}";
         }
     }
-
-    if (BatteryCountLabel != null)
-    {
-        BatteryCountLabel.Text = $"x{InventoryBatteries}";
-    }
-}
 
     private void UpdateCrouchCollision(float delta)
     {
@@ -605,8 +659,15 @@ public partial class Player : CharacterBody3D
         if (InteractRay == null || !InteractRay.IsColliding()) return;
 
         var collider = InteractRay.GetCollider();
-        IHoldable holdable = FindHoldable(collider);
 
+        var door = FindDoor(collider);
+        if (door != null)
+        {
+            door.Interact();
+            return;
+        }
+
+        IHoldable holdable = FindHoldable(collider);
         if (holdable != null)
         {
             PickupObject(holdable);
@@ -635,6 +696,22 @@ public partial class Player : CharacterBody3D
 
         return null;
     }
+    public void Die()
+{
+    // Забороняємо подвійне спрацьовування
+    if (GetTree().Paused) return;
+
+    if (PlayerDeathScreen != null)
+    {
+        PlayerDeathScreen.TriggerDeath();
+    }
+    else
+    {
+        // Шукаємо по сцені, якщо не прикріплено в інспекторі
+        var screen = GetTree().Root.FindChild("DeathScreen", true, false) as DeathScreen;
+        screen?.TriggerDeath();
+    }
+}
 
     private void PickupObject(IHoldable holdable)
     {
@@ -703,7 +780,7 @@ public partial class Player : CharacterBody3D
 
         if (_heldObject != null)
         {
-            InteractPrompt.Text = "[E] Кинути під ноги  |  [ЛКМ] Жбурнути";
+            InteractPrompt.Text = "[E] Кинути під ноги | [ЛКМ] Жбурнути";
             return;
         }
 
@@ -711,7 +788,8 @@ public partial class Player : CharacterBody3D
         {
             var collider = InteractRay.GetCollider();
 
-            if (collider is InteractiveDoor door)
+            var door = FindDoor(collider);
+            if (door != null)
             {
                 InteractPrompt.Text = door.PromptText;
                 return;
