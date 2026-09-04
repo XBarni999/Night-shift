@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://ctk4ryhao4ow0"
+path="res://.godot/imported/Battery insert into flashlight.mp3-040c9b50a37753ec3d698c7a919779ab.mp3str"
+
+[deps]
+
+source_file="res://Sounds/Battery insert into flashlight.mp3"
+dest_files=["res://.godot/imported/Battery insert into flashlight.mp3-040c9b50a37753ec3d698c7a919779ab.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

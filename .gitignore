@@ -1,12 +1,34 @@
-# Godot 4 кеш та імпорт
+# Godot: проєкт, кеш та сцени
 .godot/
+project.godot
+*.tscn
+*.tres
 
-# C# / .NET збірка
+# Текстури та графіка
+*.png
+*.jpg
+*.jpeg
+*.tga
+*.webp
+*.psd
+*.exr
+*.hdr
+
+# 3D моделі та ассети
+*.glb
+*.gltf
+*.obj
+*.fbx
+*.blend
+
+# Аудіо
+*.wav
+*.mp3
+*.ogg
+
+# .NET / C# службові файли
 .vs/
+.idea/
 bin/
 obj/
 *.csproj.user
-
-# Системні файли
-Thumbs.db
-.DS_Store
